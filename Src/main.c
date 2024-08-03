@@ -39,6 +39,10 @@ limitations under the License.
 */
 
 
+// Create a variable/register we can assign/read from an address
+#define MAKE_REG(ADDR) (*(volatile unsigned int *)(ADDR))
+
+
 // Nucleo-F767ZI
 // Where is the LED connected? Pin? Port?
 // Pins are grouped into ports.
@@ -53,21 +57,25 @@ limitations under the License.
 // Blue: Port B, Pin 7
 // Red: Port B, Pin 14
 
+#define GREEN_PIN_B 0
+#define BLUE_PIN_B  7
+#define RED_PIN_B   14
+
+
 // How to access GPIO Port B?
 // Check the memory map.
 // See RM0410 Rev 5 (not in the data sheet)
 // Page 78 references GPIO memory map
 // GPIOB: 0x402 0400-07FF
 // Part of AHB1 bus, address 0x4000 0000-7FFF
-// Page 238 references
-//
+// Page 238 detailed references
+// Page 185 has RCC AHB1 peripheral clock register (RCC_AHB1ENR)
 
 #define PERIPH_BASE  0x40000000UL // RM0410 Rev 5 page 77
 #define AHB1_OFFSET  0x00020000UL // RM0410 Rev 5 page 77
 #define AHB1_BASE    (PERIPH_BASE + AHB1_OFFSET)
 #define GPIOB_OFFSET 0x00000400UL // RM0410 Rev 5 page 78
 #define GPIOB_BASE   (AHB1_BASE + GPIOB_OFFSET)
-
 
 // We have to enable the clock to the various peripherals
 // before we use them - it's a power saving optimization
@@ -80,7 +88,55 @@ limitations under the License.
 // Then we have to enable AHB1, because our module connects to AHB1.
 
 // TODO: Should we mark what base each offset is against in the name?
-#define RCC_OFFSET 0x00003800UL
-#define RCC_BASE   (AHP1_BASE + RCC_OFFSET)
+#define RCC_OFFSET         0x00003800UL
+#define RCC_BASE           (AHP1_BASE + RCC_OFFSET)
+#define RCC_AHB1ENR_OFFSET 0x0030UL
+// _R = Register
+#define RCC_AHB1ENR_ADDR  (RCC_BASE + RCC_AHB1ENR_OFFSET)
+// TODO: Shouldn't this be unsigned long given the above UL suffixes?
+#define RCC_AHB1ENR_R     (MAKE_REG(RCC_AHB1ENR_ADDR))
+
+#define GPIOB_CLK_EN      (1UL << 5) // Bit 1 of RCC_AHB1ENR_R - see page 185 of RM
+
+
+// Now we have to configure the GPIO pin for direction (output in our case)
+// and what data to output.
+// Mode register configures the pin direction. ("MODER")
+// We need to configure our three LED pins as outputs (0, 7, 14).
+
+#define GPIOx_MODER_OFFSET 0x0000UL
+#define GPIOB_MODER_ADDR   (GPIOB_BASE + GPIOx_MODER_OFFSET)
+#define GPIOB_MODER_R      (MAKE_REG(GPIOB_MODER_ADDR))
+
+// Settings for the MODER bit pairs; only bits 0-1 used
+// Each pin gets 2 bits in the register.
+#define MODER_INPUT  0x00UL
+#define MODER_OUTPUT 0x01UL
+#define MODER_ALT    0x02UL
+#define MODER_ANALOG 0x03UL
+
+// We want to be able to set any given MODER pin to any given two bits setting.
+#define MODER_PIN_MASK(PIN)     (0x3UL << ((PIN) * 2))
+#define MODE_PIN(PIN,MODE)      ((MODE) << ((PIN) * 2))
+// The mode should be everything it was before, except these 2 pins,
+// so mask off those two new pins set only them.
+// newr = (oldr & mask) | setting
+#define MODER_PIN_SET(MODER_R,PIN,MODE) \
+  do { \
+    (MODER_R) = ((MODER_R) & ~(MODER_PIN_MASK(PIN))) | MODE_PIN(PIN,MODE); \
+  } while (0)
+
+// Now our output data register (ODR)
+#define ODR_OFFSET     0x0014UL
+#define GPIOB_ODR_ADDR (GPIOB_BASE + ODR_OFFSET)
+#define GPIOB_ODR_R    (MAKE_REG(GPIOB_ODR_ADDR))
+// Now set the output register - a 1 bit value only!
+#define ODR_PIN_SET(ODR_R,PIN,VAL) \
+  do { \
+    (ODR_R) = ((ODR_R) & ~(0x1UL << (PIN))) | ((VAL & 0x01UL) << (PIN)); \
+  } while (0)
+
+
+
 
 int main() { unsigned long x = GPIOB_BASE; return x; }
