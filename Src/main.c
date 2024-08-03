@@ -89,14 +89,14 @@ limitations under the License.
 
 // TODO: Should we mark what base each offset is against in the name?
 #define RCC_OFFSET         0x00003800UL
-#define RCC_BASE           (AHP1_BASE + RCC_OFFSET)
+#define RCC_BASE           (AHB1_BASE + RCC_OFFSET)
 #define RCC_AHB1ENR_OFFSET 0x0030UL
 // _R = Register
 #define RCC_AHB1ENR_ADDR  (RCC_BASE + RCC_AHB1ENR_OFFSET)
 // TODO: Shouldn't this be unsigned long given the above UL suffixes?
 #define RCC_AHB1ENR_R     (MAKE_REG(RCC_AHB1ENR_ADDR))
 
-#define GPIOB_CLK_EN      (1UL << 5) // Bit 1 of RCC_AHB1ENR_R - see page 185 of RM
+#define GPIOB_CLK_EN      (1UL << 1) // Bit 1 of RCC_AHB1ENR_R - see page 185 of RM
 
 
 // Now we have to configure the GPIO pin for direction (output in our case)
@@ -121,6 +121,7 @@ limitations under the License.
 // The mode should be everything it was before, except these 2 pins,
 // so mask off those two new pins set only them.
 // newr = (oldr & mask) | setting
+// TODO: Convert this to an inline function
 #define MODER_PIN_SET(MODER_R,PIN,MODE) \
   do { \
     (MODER_R) = ((MODER_R) & ~(MODER_PIN_MASK(PIN))) | MODE_PIN(PIN,MODE); \
@@ -131,12 +132,32 @@ limitations under the License.
 #define GPIOB_ODR_ADDR (GPIOB_BASE + ODR_OFFSET)
 #define GPIOB_ODR_R    (MAKE_REG(GPIOB_ODR_ADDR))
 // Now set the output register - a 1 bit value only!
+// TODO: Convert this to an inline function
 #define ODR_PIN_SET(ODR_R,PIN,VAL) \
   do { \
-    (ODR_R) = ((ODR_R) & ~(0x1UL << (PIN))) | ((VAL & 0x01UL) << (PIN)); \
+    (ODR_R) = ((ODR_R) & ~(0x1UL << (PIN))) | (((VAL) & 0x01UL) << (PIN)); \
   } while (0)
 
 
 
 
-int main() { unsigned long x = GPIOB_BASE; return x; }
+int main() {
+
+  // Enable clock access to GPIO Port B
+  RCC_AHB1ENR_R |= GPIOB_CLK_EN;
+
+  // Set our Green LED output mode
+  MODER_PIN_SET(GPIOB_MODER_R, GREEN_PIN_B, MODER_OUTPUT);
+
+  // Turn on and off an LED with busy waiting.
+  unsigned int green_cur = 0;
+  while (1) {
+    ODR_PIN_SET(GPIOB_ODR_R, GREEN_PIN_B, green_cur);
+    green_cur = ~green_cur;
+    for (unsigned int i = 0; i < 1 * 1000 * 1000; i++);
+    // The default clock must be very slow as this busy loop
+    // causes like a 0.5Hz blink.
+  }
+
+  return 0; // Required by C convention, but this should never return.
+}
