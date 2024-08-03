@@ -20,3 +20,7 @@ Tools used:
 Eclipse plugins used:
 
 * [Bracketeer2](https://marketplace.eclipse.org/content/bracketeer2)
+
+GCC Options Used:
+* `-save-temps` saves the generated assembly files for inspection
+* `-fverbose-asm` adds more information into the assembly files
