@@ -148,12 +148,22 @@ int main() {
 
   // Set our Green LED output mode
   MODER_PIN_SET(GPIOB_MODER_R, GREEN_PIN_B, MODER_OUTPUT);
+  MODER_PIN_SET(GPIOB_MODER_R, BLUE_PIN_B,   MODER_OUTPUT);
+  MODER_PIN_SET(GPIOB_MODER_R, RED_PIN_B,   MODER_OUTPUT);
 
   // Turn on and off an LED with busy waiting.
-  unsigned int green_cur = 0;
+  unsigned int cur = 0;
+  unsigned int pin = 0;
+  const unsigned int num_pins = 3;
   while (1) {
-    ODR_PIN_SET(GPIOB_ODR_R, GREEN_PIN_B, green_cur);
-    green_cur = ~green_cur;
+    switch (pin) {
+      case 0: ODR_PIN_SET(GPIOB_ODR_R, GREEN_PIN_B, cur); break;
+      case 1: ODR_PIN_SET(GPIOB_ODR_R, BLUE_PIN_B,  cur); break;
+      case 2: ODR_PIN_SET(GPIOB_ODR_R, RED_PIN_B,   cur); break;
+    }
+    cur = ~cur;
+    pin++;
+    if (pin >= num_pins) pin = 0;
     for (unsigned int i = 0; i < 1 * 1000 * 1000; i++);
     // The default clock must be very slow as this busy loop
     // causes like a 0.5Hz blink.
