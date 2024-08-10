@@ -1,3 +1,4 @@
+#ifdef USE_MAIN_WITH_HEADER
 /*
  * Douglas P. Fields, Jr. <symbolics@lisp.engineer>
  * August 2024
@@ -7,7 +8,7 @@
  *
  * Work from: ARM Cortex-M7 STM32F7 Bare-Metal Programming From Ground Up
  * URL: https://www.udemy.com/course/arm-cortex-m7-stm32f7-bare-metal-programming-from-ground-uptm/learn/lecture/26615904#overview
- * Chapter 11: GPIO Output BSRR - Bit Set/Reset Register
+ * Chapter 10: GPIO Output Driver
  *
  * My board: Nucleo-F767ZI
  * Chip: STM32F767ZIT6U
@@ -64,14 +65,14 @@ int main(void) {
   // Configure LED pins as output pins
 
   GPIOB->MODER |= USER_LED1_MODER | USER_LED2_MODER | USER_LED3_MODER;
+  // Set initial ones
+  GPIOB->ODR ^= USER_LED2;
 
   while (1) {
     // Toggle LEDs
+    GPIOB->ODR ^= USER_LED1 | USER_LED2 | USER_LED3;
 
-    GPIOB->BSRR = USER_LED1 | USER_LED2 | USER_LED3; // Turn LEDs on
-    for (int i = 0; i < 1000000; i++);
-
-    GPIOB->BSRR = (USER_LED1 | USER_LED2 | USER_LED3) << 16; // Turn LEDs off
     for (int i = 0; i < 1000000; i++);
   }
 }
+#endif
