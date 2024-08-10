@@ -38,6 +38,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <stdint.h>
 
 // Create a variable/register we can assign/read from an address
 #define MAKE_REG(ADDR) (*(volatile unsigned int *)(ADDR))
@@ -148,7 +149,7 @@ int main() {
 
   // Set our Green LED output mode
   MODER_PIN_SET(GPIOB_MODER_R, GREEN_PIN_B, MODER_OUTPUT);
-  MODER_PIN_SET(GPIOB_MODER_R, BLUE_PIN_B,   MODER_OUTPUT);
+  MODER_PIN_SET(GPIOB_MODER_R, BLUE_PIN_B,  MODER_OUTPUT);
   MODER_PIN_SET(GPIOB_MODER_R, RED_PIN_B,   MODER_OUTPUT);
 
   // Turn on and off an LED with busy waiting.
@@ -160,6 +161,7 @@ int main() {
       case 0: ODR_PIN_SET(GPIOB_ODR_R, GREEN_PIN_B, cur); break;
       case 1: ODR_PIN_SET(GPIOB_ODR_R, BLUE_PIN_B,  cur); break;
       case 2: ODR_PIN_SET(GPIOB_ODR_R, RED_PIN_B,   cur); break;
+      default: break;
     }
     cur = ~cur;
     pin++;
