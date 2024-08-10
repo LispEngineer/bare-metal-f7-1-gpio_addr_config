@@ -1,3 +1,4 @@
+#ifdef USE_MAIN_BSRR
 /*
  * Douglas P. Fields, Jr. <symbolics@lisp.engineer>
  * August 2024
@@ -7,7 +8,7 @@
  *
  * Work from: ARM Cortex-M7 STM32F7 Bare-Metal Programming From Ground Up
  * URL: https://www.udemy.com/course/arm-cortex-m7-stm32f7-bare-metal-programming-from-ground-uptm/learn/lecture/26615904#overview
- * Chapter 12: GPIO Input
+ * Chapter 11: GPIO Output BSRR - Bit Set/Reset Register
  *
  * My board: Nucleo-F767ZI
  * Chip: STM32F767ZIT6U
@@ -43,56 +44,36 @@ limitations under the License.
 
 // Define our pins
 
-// Clock enable bits
 #define GPIOB_CLK_EN      (1UL << 1) // Bit 1 of RCC_AHB1ENR_R - see page 185 of RM
-#define GPIOC_CLK_EN      (1UL << 2) // Bit 2 of RCC_AHB1ENR_R - see page 185 of RM
 
-// Blue button is a user input
-// Per Nucleo user guide, it's PC13 (UM1974 Rev 10 p24 sec 6.6)
-// Per Datasheet, this is also on AHB1
-// Per RM, we can set the GPIOC
-// IDR - input data register - lower 16 bits
-
-// Pin numbers in a bank
 #define GREEN_PIN_B 0
 #define BLUE_PIN_B  7
 #define RED_PIN_B   14
-#define USER_BTN_B  13
 
-// Mode registers
-#define USER_LED1_MODER (1U << (GREEN_PIN_B * 2)) // Output
+#define USER_LED1_MODER (1U << (GREEN_PIN_B * 2))
 #define USER_LED2_MODER (1U << ( BLUE_PIN_B * 2))
 #define USER_LED3_MODER (1U << (  RED_PIN_B * 2))
-#define USER_BTN_MODER  (~(3U << (USER_BTN_B * 2))) // Input
 
-// Output registers
 #define USER_LED1       (1U << GREEN_PIN_B)
 #define USER_LED2       (1U <<  BLUE_PIN_B)
 #define USER_LED3       (1U <<   RED_PIN_B)
 
-// Input registers
-#define USER_BTN        (1U << USER_BTN_B)
-
 int main(void) {
-  // Enable clock access to Ports B & C
-  RCC->AHB1ENR |= GPIOB_CLK_EN | GPIOC_CLK_EN;
+  // Enable clock access to Port B
+  RCC->AHB1ENR |= GPIOB_CLK_EN;
 
   // Configure LED pins as output pins
+
   GPIOB->MODER |= USER_LED1_MODER | USER_LED2_MODER | USER_LED3_MODER;
 
-  // Configure button pin as input pin
-  GPIOC->MODER &= USER_BTN_MODER;
-
   while (1) {
-    // Toggle LEDs when button not pushed
-    if (!(GPIOC->IDR & USER_BTN)) {
-      GPIOB->BSRR = USER_LED1 | USER_LED2 | USER_LED3; // Turn LEDs on
-      for (int i = 0; i < 1000000; i++);
-    }
+    // Toggle LEDs
 
-    if (!(GPIOC->IDR & USER_BTN)) {
-      GPIOB->BSRR = (USER_LED1 | USER_LED2 | USER_LED3) << 16; // Turn LEDs off
-      for (int i = 0; i < 1000000; i++);
-    }
+    GPIOB->BSRR = USER_LED1 | USER_LED2 | USER_LED3; // Turn LEDs on
+    for (int i = 0; i < 1000000; i++);
+
+    GPIOB->BSRR = (USER_LED1 | USER_LED2 | USER_LED3) << 16; // Turn LEDs off
+    for (int i = 0; i < 1000000; i++);
   }
 }
+#endif
