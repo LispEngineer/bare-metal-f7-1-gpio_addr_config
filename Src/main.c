@@ -142,13 +142,24 @@ void uart3_tx_init(void) {
   set_uart_transfer_enable(USART3);
 }
 
-void uart_write(USART_TypeDef *usartx, uint8_t val) {
+int uart_write(USART_TypeDef *usartx, uint8_t val) {
   // Ensure transmit data register is empty - "TXE"
   // If it's 1, the transmit is empty
-  while (!(usartx->ISR & USART_ISR_TXE));
+
+  // the compiler optimizes this away as a "register int"
+  // but not as an "int" or a "volatile register int",
+  // and not if you return it
+  register int x = 0;
+
+  // I am immensely curious what x is. It presumably is related to however
+  // many instructions/clocks this takes per iteration and the divider
+  // (which is 16,000,000 / 115,200 ~~ 138 to 139
+  while (!(usartx->ISR & USART_ISR_TXE)) x++;
 
   // Write the value into the transmit data register
   usartx->TDR = val;
+
+  return x;
 }
 
 
@@ -157,17 +168,19 @@ int main(void) {
 
   int delay_fake = 0;
   const uint8_t start = 'A';
-  const uint8_t end = 'F';
+  const uint8_t end = 'Z';
   uint8_t current = start;
 
   uart3_tx_init();
 
   while (1) {
     uart_write(USART3, current);
-    for (int i = 0; i < 9000; i++) {
+    /*
+    for (int i = 0; i < 100; i++) {
       // Prevent empty loop from being optimized away by compiler
       delay_fake++;
     }
+    */
     current++;
     if (current > end) {
       current = start;

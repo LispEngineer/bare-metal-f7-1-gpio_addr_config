@@ -13,24 +13,35 @@ Based upon work doing a Udemy course:
 See more details in code (e.g., [main.c](Src/main.c))
 
 Tools used:
-
 * STM32CubeIDE 1.16
 * STM32CubeProgrammer
 * ST Microelectronics Nucleo-F767ZI board
 
 Eclipse plugins used:
-
 * [Bracketeer2](https://marketplace.eclipse.org/content/bracketeer2)
 
 GCC Options Used:
 * `-save-temps` saves the generated assembly files for inspection
 * `-fverbose-asm` adds more information into the assembly files
 
+# Documentation References
+
+* [STM32F767xx Datasheet](https://www.st.com/resource/en/datasheet/stm32f765bi.pdf)
+* [RM0410 STM32F76 Reference Manual](https://www.st.com/resource/en/reference_manual/rm0410-stm32f76xxx-and-stm32f77xxx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)
+* [UM1974 Nucleo-144 User manual](https://www.st.com/resource/en/user_manual/um1974-stm32-nucleo144-boards-mb1137-stmicroelectronics.pdf)
+* [Arm Cortex-M7 Technical Reference Manual](https://developer.arm.com/documentation/ddi0489/latest/)
+* [Arm v7-M Architecture Reference Manual](https://developer.arm.com/documentation/ddi0403/latest/)
+
 # Eclipse Notes
 
 * Set "Scalability Mode" to something really high like 25,000 lines
   * Then right-click the project and rebuild the index
   * The STM header files are huge!
+  
+* To see the assembly code, look at these files:
+  * `<filename>.s` for the raw GCC generated assembly
+  * `bare-metal-f7-1-gpio_addr_config.list` to show nicely formatted assembly with
+    C source code interspersed
 
 # Lesson Notes
 
@@ -100,10 +111,9 @@ Also `system_stm32f7xx.h` and associated `.c` and `.s` startup files.
 * baud rate
   * seems to be a ratio between the usart module speed and the desired baud rate
 
-
 Computer:
-
 * See what COM port it is in PowerShell:
   * `Get-CimInstance -Class Win32_SerialPort | Select-Object Name, Description, DeviceID`
   * `COM6` in my case: `STMicroelectronics STLink Virtual COM Port`
  
+After lesson 19, we have UART output via USB.
