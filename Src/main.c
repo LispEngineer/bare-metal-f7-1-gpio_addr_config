@@ -7,7 +7,7 @@
  *
  * Work from: ARM Cortex-M7 STM32F7 Bare-Metal Programming From Ground Up
  * URL: https://www.udemy.com/course/arm-cortex-m7-stm32f7-bare-metal-programming-from-ground-uptm/learn/lecture/26615904#overview
- * Chapters 14-19: UART TX
+ * Chapters 14-21: UART TX with printf
  *
  * My board: Nucleo-F767ZI
  * Chip: STM32F767ZIT6U
@@ -30,6 +30,7 @@ limitations under the License.
 */
 
 #include <stdint.h>
+#include <stdio.h>
 
 // We need to set include files from STM32CubeF7
 //   Project -> Properties -> C/C++ General -> Paths and Symbols
@@ -163,29 +164,20 @@ int uart_write(USART_TypeDef *usartx, uint8_t val) {
 }
 
 
+// To enable printf to send via our "console" port, we need
+// to implement this function
+int __io_putchar(int ch) {
+  uart_write(USART3, (uint8_t)ch);
+  return ch;
+}
+
+
 // Send stuff over ST-LINK UART
 int main(void) {
-
-  int delay_fake = 0;
-  const uint8_t start = 'A';
-  const uint8_t end = 'Z';
-  uint8_t current = start;
-
   uart3_tx_init();
 
   while (1) {
-    uart_write(USART3, current);
-    /*
-    for (int i = 0; i < 100; i++) {
-      // Prevent empty loop from being optimized away by compiler
-      delay_fake++;
-    }
-    */
-    current++;
-    if (current > end) {
-      current = start;
-    }
-
+    printf("Hello, world!\r\n");
   }
 
 }
