@@ -70,4 +70,15 @@ In `Device/ST/STM32F7xx`, look for `stm32f767xx.h`.
 
 Also `system_stm32f7xx.h` and associated `.c` and `.s` startup files.
 * We seem to be using the GCC tool chain on STM32CubeIDE
-* 
+
+## Lesson 15 - UART TX
+
+* USART3 is connected to the Nucleo USB cable
+  * On APB1 per Data Sheet
+  * Alternate functions: See DataSheet Rev 8 p89 Table 13
+  * Per Nucleo UM, USART3 TX = PD8; RX = PD9
+    * SB4-7 control ST-LINK and/or morpho; by default it is both (UM1974 Rev 10 Sec 6.9 p 26)
+  * PD10-12 are CK, CTS, RTS as well
+* See what COM port it is in PowerShell:
+  * `Get-CimInstance -Class Win32_SerialPort | Select-Object Name, Description, DeviceID`
+  * `COM6` in my case: `STMicroelectronics STLink Virtual COM Port`
