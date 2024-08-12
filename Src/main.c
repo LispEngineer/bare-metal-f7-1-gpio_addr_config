@@ -2,7 +2,7 @@
  * Douglas P. Fields, Jr. <symbolics@lisp.engineer>
  * August 2024
  * Copyright 2024 Douglas P. Fields, Jr.
- * License: Apache Licensee, Version 2.0
+ * License: Apache License, Version 2.0
  *          https://www.apache.org/licenses/LICENSE-2.0.txt
  *
  * Work from: ARM Cortex-M7 STM32F7 Bare-Metal Programming From Ground Up
