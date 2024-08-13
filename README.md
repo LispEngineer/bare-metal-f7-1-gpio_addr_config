@@ -87,7 +87,7 @@ In `Device/ST/STM32F7xx`, look for `stm32f767xx.h`.
 Also `system_stm32f7xx.h` and associated `.c` and `.s` startup files.
 * We seem to be using the GCC tool chain on STM32CubeIDE
 
-## Lessons 14-19 - UART TX
+## Lessons 14-23 - UART TX & RX with printf
 
 * USART3 is connected to the Nucleo USB cable
   * On APB1 per Data Sheet

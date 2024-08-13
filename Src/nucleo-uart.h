@@ -21,5 +21,6 @@
 
 // USART3 transmit data pin on bank D alternate mode
 #define USART3_TX_PIN_D 8
+#define USART3_RX_PIN_D 9
 
 #endif /* NUCLEO_UART_H_ */
